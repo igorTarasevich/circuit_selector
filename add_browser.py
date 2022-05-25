@@ -1,6 +1,11 @@
 from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QFileDialog
+
 
 class Add_Browser(QtWidgets.QMainWindow):
+    browser_data = pyqtSignal(str, str)
+
     def __init__(self):
         super(Add_Browser, self).__init__()
         self.setupUi(self)
@@ -19,12 +24,14 @@ class Add_Browser(QtWidgets.QMainWindow):
         self.pushButton_add = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_add.setGeometry(QtCore.QRect(340, 60, 75, 23))
         self.pushButton_add.setObjectName("pushButton_add")
+        self.pushButton_add.clicked.connect(self.send_data)
         self.label_choose = QtWidgets.QLabel(self.centralwidget)
         self.label_choose.setGeometry(QtCore.QRect(10, 20, 91, 16))
         self.label_choose.setObjectName("label_choose")
         self.pushButton_choose = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_choose.setGeometry(QtCore.QRect(340, 20, 75, 23))
         self.pushButton_choose.setObjectName("pushButton_choose")
+        self.pushButton_choose.clicked.connect(self.choose_browser)
         self.label_path = QtWidgets.QLabel(self.centralwidget)
         self.label_path.setGeometry(QtCore.QRect(110, 20, 61, 16))
         self.label_path.setObjectName("label_path")
@@ -41,3 +48,12 @@ class Add_Browser(QtWidgets.QMainWindow):
         self.label_choose.setText(_translate("MainWindow", "\".exe\" path"))
         self.pushButton_choose.setText(_translate("MainWindow", "Choose"))
         self.label_path.setText(_translate("MainWindow", ""))
+
+    def choose_browser(self):
+        path = QFileDialog.getOpenFileName(self, "Open File", "C:/Program files/", "EXE File (*.exe)")
+        self.label_path.setText(path[0])
+        self.label_path.adjustSize()
+
+    def send_data(self):
+        self.browser_data.emit(self.label_path.text(), self.lineEdit_name.text())
+        self.close()

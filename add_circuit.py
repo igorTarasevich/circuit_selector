@@ -3,7 +3,7 @@ from PyQt5.QtCore import pyqtSignal
 
 
 class Add_Circuit(QtWidgets.QMainWindow):
-    # circuit_name = pyqtSignal(str)
+    circuit_name = pyqtSignal(str)
 
     def __init__(self):
         super(Add_Circuit, self).__init__()
@@ -23,7 +23,7 @@ class Add_Circuit(QtWidgets.QMainWindow):
         self.pushButton_name = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_name.setGeometry(QtCore.QRect(240, 20, 75, 23))
         self.pushButton_name.setObjectName("pushButton_name")
-        # self.pushButton_name.clicked.connect(self.send_data)
+        self.pushButton_name.clicked.connect(self.send_data)
         add_circuit_window.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(add_circuit_window)
@@ -35,7 +35,7 @@ class Add_Circuit(QtWidgets.QMainWindow):
         self.label_name.setText(_translate("MainWindow", "Enter name"))
         self.pushButton_name.setText(_translate("MainWindow", "Add"))
 
-    # def send_data(self):
-    #     self.circuit_name.emit(self.lineEdit_name.text())
-    #     self.close()
+    def send_data(self):
+        self.circuit_name.emit(self.lineEdit_name.text())
+        self.close()
 
