@@ -9,15 +9,38 @@
 import webbrowser
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QSettings
 from PyQt5.QtWidgets import QMainWindow
 from add_circuit import Add_Circuit
 from add_browser import Add_Browser
 
 
 class Ui_MainWindow(QMainWindow):
+
     combobox_browser_items = ["Chrome", "Opera"]
     combobox_curcuit_items = ["preprod", "alpha", "charlie", "delta", "foxtrot", "hotfix", "whiskey"]
     combobox_app_items = ["app", "hub", "ops"]
+
+    def __init__(self):
+        super(Ui_MainWindow, self).__init__()
+        self.setupUi(self)
+        self.settings = QSettings("Circuit selector", "Company", self)
+        self.loadSetting()
+
+    def closeEvent(self, e):
+        self.saveSetting()
+        e.accept()
+
+    def saveSetting(self):
+        self.settings.setValue('browsers', self.combobox_browser_items)
+
+    def loadSetting(self):
+        if not self.settings.contains("browsers"):
+            self.fill_combobox(self.comboBox_browser, ["Chrome", "Opera"])
+        else:
+            self.combobox_browser_items = self.settings.value("browsers")
+
+
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -116,8 +139,6 @@ class Ui_MainWindow(QMainWindow):
         self.combobox_browser_items.append(name)
         self.comboBox_browser.clear()
         self.fill_combobox(self.comboBox_browser, self.combobox_browser_items)
-        print(path)
-        print(name)
 
     def add_circuit(self, circuit_name):
         self.combobox_curcuit_items.append(circuit_name)
@@ -155,8 +176,6 @@ class Ui_MainWindow(QMainWindow):
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
+    window = Ui_MainWindow()
+    window.show()
     sys.exit(app.exec_())

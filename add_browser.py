@@ -55,5 +55,18 @@ class Add_Browser(QtWidgets.QMainWindow):
         self.label_path.adjustSize()
 
     def send_data(self):
-        self.browser_data.emit(self.label_path.text(), self.lineEdit_name.text())
-        self.close()
+        if self.label_path.text() == "":
+            warning = QtWidgets.QMessageBox()
+            warning.setWindowTitle("Attention!")
+            warning.setText("Please choose browser '.exe' path")
+            warning.setIcon(QtWidgets.QMessageBox.Warning)
+            warning.exec_()
+        elif self.lineEdit_name.text() == "":
+            warning = QtWidgets.QMessageBox()
+            warning.setWindowTitle("Attention!")
+            warning.setText("Please fill browser name")
+            warning.setIcon(QtWidgets.QMessageBox.Warning)
+            warning.exec_()
+        else:
+            self.browser_data.emit(self.label_path.text(), self.lineEdit_name.text())
+            self.close()
