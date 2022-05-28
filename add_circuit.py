@@ -36,6 +36,13 @@ class Add_Circuit(QtWidgets.QMainWindow):
         self.pushButton_name.setText(_translate("MainWindow", "Add"))
 
     def send_data(self):
-        self.circuit_name.emit(self.lineEdit_name.text())
-        self.close()
+        if self.lineEdit_name.text() == "":
+            warning = QtWidgets.QMessageBox()
+            warning.setWindowTitle("Attention!")
+            warning.setText("Please fill circuit name")
+            warning.setIcon(QtWidgets.QMessageBox.Warning)
+            warning.exec_()
+        else:
+            self.circuit_name.emit(self.lineEdit_name.text())
+            self.close()
 

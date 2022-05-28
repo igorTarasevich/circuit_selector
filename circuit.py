@@ -16,18 +16,16 @@ from add_browser import Add_Browser
 
 
 class Ui_MainWindow(QMainWindow):
-
-
-    combobox_curcuit_items = ["preprod", "alpha", "charlie", "delta", "foxtrot", "hotfix", "whiskey"]
     combobox_app_items = ["app", "hub", "ops"]
 
     def __init__(self):
         super(Ui_MainWindow, self).__init__()
         self.settings = QSettings("Circuit selector", "Company", self)
         self.combobox_browser_items = None
+        self.browser_paths = None
+        self.combobox_circuit_items = ["preprod", "alpha", "charlie", "delta", "foxtrot", "hotfix", "whiskey"]
         self.loadSetting()
         self.setupUi(self)
-
         self.loadSetting()
 
     def closeEvent(self, e):
@@ -35,15 +33,26 @@ class Ui_MainWindow(QMainWindow):
         e.accept()
 
     def saveSetting(self):
-        self.settings.setValue('browsers', self.combobox_browser_items)
+        self.settings.setValue("browsers", self.combobox_browser_items)
+        self.settings.setValue("browser_paths", self.browser_paths)
+        self.settings.setValue("circuits", self.combobox_circuit_items)
 
     def loadSetting(self):
+        self.check_browsers()
+
+    def check_browsers(self):
         if not self.settings.contains("browsers"):
-            self.combobox_browser_items = ["Chrome"]
+            self.combobox_browser_items = ["Default"]
+            self.browser_paths = ["Default"]
         else:
             self.combobox_browser_items = self.settings.value("browsers")
+            self.browser_paths = self.settings.value("browser_paths")
 
-
+    def check_circuits(self):
+        if not self.settings.contains("circuits"):
+            self.combobox_circuit_items = ["preprod", "alpha", "charlie", "delta", "foxtrot", "hotfix", "whiskey"]
+        else:
+            self.combobox_circuit_items = self.settings.value("circuits")
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -82,7 +91,7 @@ class Ui_MainWindow(QMainWindow):
         self.comboBox_circuit = QtWidgets.QComboBox(self.centralwidget)
         self.comboBox_circuit.setGeometry(QtCore.QRect(180, 70, 69, 22))
         self.comboBox_circuit.setObjectName("comboBox_circuit")
-        self.fill_combobox(self.comboBox_circuit, self.combobox_curcuit_items)
+        self.fill_combobox(self.comboBox_circuit, self.combobox_circuit_items)
         """select browser"""
         self.comboBox_browser = QtWidgets.QComboBox(self.centralwidget)
         self.comboBox_browser.setGeometry(QtCore.QRect(290, 70, 85, 22))
@@ -138,42 +147,57 @@ class Ui_MainWindow(QMainWindow):
             combobox.addItem(items[i])
 
     def add_browser(self, path, name):
-        webbrowser.register(name, None, webbrowser.BackgroundBrowser(path))
+        self.browser_paths.append(path)
+        print(self.browser_paths)
         self.combobox_browser_items.append(name)
         self.comboBox_browser.clear()
         self.fill_combobox(self.comboBox_browser, self.combobox_browser_items)
 
     def add_circuit(self, circuit_name):
-        self.combobox_curcuit_items.append(circuit_name)
+        self.combobox_circuit_items.append(circuit_name)
         self.comboBox_circuit.clear()
-        self.fill_combobox(self.comboBox_circuit, self.combobox_curcuit_items)
+        self.fill_combobox(self.comboBox_circuit, self.combobox_circuit_items)
 
     def open_tests_tests(self):
+        browser_name = self.comboBox_browser.currentText()
         if self.comboBox_circuit.currentText() == "preprod":
-            webbrowser.open_new_tab("https://preprod-stenn-operations.azurewebsites.net/tests/tests")
+            url = "https://preprod-stenn-operations.azurewebsites.net/tests/tests"
         else:
-            webbrowser.open_new_tab(f"https://{self.comboBox_circuit.currentText()}"
-                              f"-operations-web.azurewebsites.net/tests/tests")
+            url = f"https://{self.comboBox_circuit.currentText()}-operations-web.azurewebsites.net/tests/tests"
+        self.open_url_in_browser(browser_name, url)
+
+    def create_url(self):
+        if self.comboBox_app.currentText() == "ops":
+            return self.create_ops_url()
+        elif self.comboBox_circuit.currentText() == "preprod":
+            return self.create_preprod_app_and_hub_url()
+        else:
+            return self.create_app_and_hub_url()
+
+    def create_app_and_hub_url(self):
+        return f"https://{self.comboBox_app.currentText()}-{self.comboBox_circuit.currentText()}.stenndev.com"
+
+    def create_ops_url(self):
+        return f"https://{self.comboBox_circuit.currentText()}-operations-web.azurewebsites.net"
+
+    def create_preprod_app_and_hub_url(self):
+        return f"https://preprod-{self.comboBox_app.currentText()}-web.stenndev.com"
 
     def open_application(self):
-        if self.comboBox_app.currentText() == "ops":
-            self.open_ops_url()
-        elif self.comboBox_circuit.currentText() == "preprod":
-            self.open_preprod_app_and_hub_url()
+        browser_name = self.comboBox_browser.currentText()
+        url = self.create_url()
+        self.open_url_in_browser(browser_name, url)
+
+    def open_url_in_browser(self, browser_name, url):
+        if browser_name != "Default":
+            browser_id = self.combobox_browser_items.index(browser_name)
+            webbrowser.register(
+                browser_name, None,
+                webbrowser.BackgroundBrowser(self.browser_paths[browser_id])
+            )
+            webbrowser.get(browser_name).open_new_tab(url)
         else:
-            self.open_app_and_hub_url()
-
-    def open_app_and_hub_url(self):
-        url = f"https://{self.comboBox_app.currentText()}-{self.comboBox_circuit.currentText()}.stenndev.com"
-        webbrowser.open_new_tab(url)
-
-    def open_ops_url(self):
-        url = f"https://{self.comboBox_circuit.currentText()}-operations-web.azurewebsites.net/"
-        webbrowser.open_new_tab(url)
-
-    def open_preprod_app_and_hub_url(self):
-        url = f"https://preprod-{self.comboBox_app.currentText()}-web.stenndev.com/session-expired"
-        webbrowser.open_new_tab(url)
+            webbrowser.open_new_tab(url)
 
 
 if __name__ == "__main__":
