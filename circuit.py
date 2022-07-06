@@ -10,6 +10,7 @@ import webbrowser
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QSettings
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMainWindow
 from add_circuit import Add_Circuit
 from add_browser import Add_Browser
@@ -23,7 +24,7 @@ class Ui_MainWindow(QMainWindow):
         self.settings = QSettings("Circuit selector", "Company", self)
         self.combobox_browser_items = None
         self.browser_paths = None
-        self.combobox_circuit_items = ["preprod", "alpha", "charlie", "delta", "foxtrot", "hotfix", "whiskey"]
+        self.combobox_circuit_items = ["preprod", "alfa", "charlie", "delta", "foxtrot", "hotfix", "whiskey"]
         self.loadSetting()
         self.setupUi(self)
         self.loadSetting()
@@ -36,9 +37,12 @@ class Ui_MainWindow(QMainWindow):
         self.settings.setValue("browsers", self.combobox_browser_items)
         self.settings.setValue("browser_paths", self.browser_paths)
         self.settings.setValue("circuits", self.combobox_circuit_items)
+        self.settings.setValue("geometry", self.geometry())
 
     def loadSetting(self):
         self.check_browsers()
+        self.check_circuits()
+        self.check_geometry()
 
     def check_browsers(self):
         if not self.settings.contains("browsers"):
@@ -54,9 +58,13 @@ class Ui_MainWindow(QMainWindow):
         else:
             self.combobox_circuit_items = self.settings.value("circuits")
 
+    def check_geometry(self):
+        if self.settings.contains("geometry"):
+            self.setGeometry(self.settings.value("geometry"))
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(800, 600)
+        MainWindow.resize(562, 213)
         self.circuit_window = Add_Circuit()
         self.browser_window = Add_Browser()
         self.centralwidget = QtWidgets.QWidget(MainWindow)
@@ -101,6 +109,8 @@ class Ui_MainWindow(QMainWindow):
         self.pushButton_open = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_open.setGeometry(QtCore.QRect(400, 70, 75, 23))
         self.pushButton_open.setObjectName("pushButton_open")
+        # self.pushButton_open.setStyleSheet("""QPushButton { color:#000; font-size:10px;
+        #                                                     border-radius: 10px; border: 2px solid #8f8f91;}""")
         self.pushButton_open.clicked.connect(self.open_application)
         """tests/tests button"""
         self.pushButton_test = QtWidgets.QPushButton(self.centralwidget)
@@ -167,21 +177,27 @@ class Ui_MainWindow(QMainWindow):
         self.open_url_in_browser(browser_name, url)
 
     def create_url(self):
-        if self.comboBox_app.currentText() == "ops":
+        if self.comboBox_app.currentText() == "ops" and self.comboBox_circuit.currentText() == "preprod":
+            return self.create_preprod_ops_url()
+        elif self.comboBox_app.currentText() == "ops":
             return self.create_ops_url()
-        elif self.comboBox_circuit.currentText() == "preprod":
-            return self.create_preprod_app_and_hub_url()
+        # elif self.comboBox_circuit.currentText() == "preprod":
+        #     return self.create_preprod_app_and_hub_url()
         else:
             return self.create_app_and_hub_url()
 
     def create_app_and_hub_url(self):
-        return f"https://{self.comboBox_app.currentText()}-{self.comboBox_circuit.currentText()}.stenndev.com"
+        # return f"https://{self.comboBox_app.currentText()}-{self.comboBox_circuit.currentText()}.stenn-hub.azurewebsites.net.com"
+        return f"https://{self.comboBox_circuit.currentText()}-stenn-{self.comboBox_app.currentText()}.azurewebsites.net"
 
     def create_ops_url(self):
         return f"https://{self.comboBox_circuit.currentText()}-operations-web.azurewebsites.net"
 
-    def create_preprod_app_and_hub_url(self):
-        return f"https://preprod-{self.comboBox_app.currentText()}-web.stenndev.com"
+    def create_preprod_ops_url(self):
+        return f"https://preprod-stenn-operations.azurewebsites.net/"
+
+    # def create_preprod_app_and_hub_url(self):
+    #     return f"https://preprod-{self.comboBox_app.currentText()}-stenn-hub.azurewebsites.net"
 
     def open_application(self):
         browser_name = self.comboBox_browser.currentText()
